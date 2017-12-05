@@ -1,6 +1,6 @@
 import React from 'react';
 
-function StockInfo({
+function PreviousState({
  symbol,
  companyName,
  primaryExchange,
@@ -28,4 +28,4 @@ function StockInfo({
   )
 }
 
-export default StockInfo;
+export default PreviousState;

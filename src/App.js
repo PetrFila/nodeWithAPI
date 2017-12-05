@@ -1,7 +1,12 @@
 import React, { Component } from 'react';
 import './App.css';
 import Stockinfo from './components/Stockinfo';
-import {loanQuoteForStock} from './api/iex';
+import PreviousState from './components/PreviousState';
+import { loadQuoteForStock } from './api/iex';
+import { loadLogoForStock } from './api/iex';
+// import { loadPreviousSet } from './api/iex';
+
+
 
 
 
@@ -9,12 +14,16 @@ class App extends Component {
   state = {
     symbol: 'A',
     quote: null,
-    hasError: false
+    logo: null,
+    hasError: false,
+    oldquote: null,
+    oldlogo: null
   }
 
   componentDidMount() {
     console.log("componentDidMount");
     this.loadQuote()
+    this.loadLogo()
   }
 
   componentWillUpdate() {
@@ -27,14 +36,19 @@ class App extends Component {
 
   //error catcher
   componentDidCatch() {
-    console.log("i am here")
+    console.log("this component catches error")
     this.setState({ hasError: true });
   }
 
+
   loadQuote() {
-    loanQuoteForStock(this.state.symbol).then((quote) => {
+    let currentStatus = this.state.quote
+    this.setState({ oldquote: currentStatus })
+    console.log(`this is the old quote variable :\n${JSON.stringify(currentStatus, null, 2)} `)
+    loadQuoteForStock(this.state.symbol).then((quote) => {
         console.log(quote)
-        // this.state.quote = ???
+        // this.setState((prevState) => { oldquote: quote })
+        // console.log('Previous state' + prevState)
         this.setState({ quote: quote })
       })
       .catch((err) => {
@@ -42,6 +56,20 @@ class App extends Component {
         this.componentDidCatch();
       })
   }
+
+  loadLogo() {
+    let currentLogo = this.state.logo
+    this.setState({oldlogo: currentLogo})
+    loadLogoForStock(this.state.symbol).then((logo) => {
+        console.log(logo)
+        this.setState({ logo: logo.url })
+      })
+      .catch((err) => {
+        console.log(err);
+        this.componentDidCatch();
+      })
+  }
+
 
   handleSymbolChange = (event) => {
     console.log(`handleSymbolChange with event: ${event}`);
@@ -55,6 +83,8 @@ class App extends Component {
   handleButtonClick = (event) => {
     console.log(event);
     this.loadQuote();
+    this.loadLogo();
+    
   }
 
 
@@ -63,7 +93,10 @@ class App extends Component {
 
     if(this.state.hasError) {
       return (
-        <h1>Sorry Something went wrong!!!</h1>
+        <div className="App">
+          <h2>Sorry, wrong input :-( </h2>
+          <p>Refresh the page and try again</p>
+        </div>
       );
     }
 
@@ -71,23 +104,28 @@ class App extends Component {
 
          // return this.props.children;
        <div className="App">
-         <h1>Wolf of React</h1>
+        <h1>Wolf of React</h1>
 
+        <input
+          value={ this.state.symbol }
+          placeholder="Enter symbol"
+          onChange={this.handleSymbolChange}
+        />
+        <button onClick = { this.handleButtonClick }>Get Quote</button>
 
-         <input
-            value={ this.state.symbol }
-            placeholder="Enter symbol"
-            onChange={this.handleSymbolChange}
-          />
-          <button onClick = { this.handleButtonClick }>Get Quote</button>
+        <div className='logo'>
+          <img src={this.state.logo}/>
+        </div>
 
+        <Stockinfo{...this.state.quote}/>
 
+        <div className='oldQuote'>
+          <h2 className="previousQuote">Previous quote</h2>
+          <img src={this.state.oldlogo}/>
+          <PreviousState{...this.state.oldquote}/>
+        </div>
 
-
-           <Stockinfo{...this.state.quote}/>
-
-
-       </div>
+      </div>
      );
    }
 }

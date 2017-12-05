@@ -1,3 +1,16 @@
 .App {
   text-align: center;
 }
+
+.logo {
+  display: block;
+  margin: auto;
+}
+
+.oldQuote {
+  margin-top: 150px;
+}
+
+.previousQuote {
+  text-decoration: underline;
+}
